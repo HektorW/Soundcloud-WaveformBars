@@ -82,7 +82,7 @@ WaveformBars.prototype.getStreamOptions = function() {
       that.draw();
     },
     whileloading: function() {
-      that.$canvas.addClass('active');
+      $(that.canvas).addClass('active');
     }
   }
 };
@@ -141,22 +141,22 @@ WaveformBars.prototype.draw = function() {
 
   var hoverColor = lerpHex(defaultColor, playedColor, 0.5);
 
+  var sweep = 1 / barCount;
+  var progress = this.progress;
 
   ctx.clearRect(0, 0, this.canvas.width, height);
   for (var i = 0; i < barCount; i++) {
 
-    if (i / bars.length < this.progress) {
-      ctx.fillStyle = playedColor;
-    } else if (i / bars.length <= this.hoverProgress) {
-      ctx.fillStyle = hoverColor;
-    } else {
-      ctx.fillStyle = defaultColor;
-    }
+    var barIndex = i / barCount;
+    var lerp = (progress - barIndex) / sweep;
+    lerp = Math.min(Math.max(lerp, 0), 1);
+
+    var fill = lerpHex(defaultColor, playedColor, lerp);
 
     var barHeight = barMaxHeight * bars[i];
     var x = i * barWidth +  i * barMargin + barMargin;
 
-    // ctx.fillStyle = defaultColor;
+    ctx.fillStyle = fill;
     ctx.fillRect(
       x,
       barBottomY - barHeight,
@@ -164,7 +164,7 @@ WaveformBars.prototype.draw = function() {
       barHeight
     );
 
-    ctx.fillStyle = defaultColorShadow;
+    ctx.fillStyle = lightenHex(fill, 0.7);
     ctx.fillRect(
       x,
       shadowTopY,
