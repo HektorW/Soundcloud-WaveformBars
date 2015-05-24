@@ -18,9 +18,9 @@
 
     canvas.bars {
       opacity: 0.8;
-      transition: 0.1s;
+      transition: 0.2s;
     }
-    canvas.bars:hover {
+    canvas.bars:hover, canvas.bars.active {
       opacity: 1.0;
     }
   </style>
@@ -42,14 +42,24 @@
         innerColor: '#85144b'
       });
 
+      var bars = window.bars = new WaveformBars({
+        canvas: $('#canvas').get(0),
+        data: waveformData,
+        barCount: 200
+      });
+
       SC.initialize({
         client_id: 'b887940f432036b3d2691c428a9863c3'
       });
 
 
+      // 188740741
+      // 293
+      var trackId = '293';
 
-      SC.get('/tracks/293', function(track) {
+      SC.get('/tracks/' + trackId, function(track) {
         waveform.dataFromSoundCloudTrack(track);
+        bars.setTrack(track);
 
         $('.song .art').attr('src', track.artwork_url);
         $('.song .title').text(track.title);
@@ -58,21 +68,12 @@
         $('.artist .name').text(track.user.username);
       });
 
-      /*SC.stream("/tracks/293", waveform.optionsForSyncedStream({
-        defaultColor: '#85144b',
-        playedColor: '#ffffff',
-        loadedColor: '#2ECC40'
-      }), function(sound) {
-        sound.play();
-      });*/
-
-      var bars = window.bars = new WaveformBars({
-        canvas: $('#canvas').get(0),
-        data: waveformData,
-        barCount: 200
+      SC.stream("/tracks/" + trackId, bars.getStreamOptions(), function(sound) {
+        // debugger
+        // sound.play();
       });
 
-      bars.draw();
+
 
     });
   </script>
@@ -95,7 +96,7 @@
   <ul id="playlist">
   </ul>
 
-  <canvas id="canvas" class="bars" width="600" height="200"></canvas>
+  <canvas id="canvas" class="bars" width="600" height="100"></canvas>
   
 </body>
 </html>
