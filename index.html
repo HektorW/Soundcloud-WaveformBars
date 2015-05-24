@@ -1,0 +1,101 @@
+<!doctype html>
+<head>
+  <title>Soundcloudie</title>
+
+  <style>
+    @import url(http://fonts.googleapis.com/css?family=Open+Sans);
+
+    body {
+      color: white;
+      font-family: 'Open Sans', sans-serif;
+      background: #001f3f;
+    }
+
+    .song, .artist {
+      float: left;
+      margin-right: 50px;
+    }
+
+    canvas.bars {
+      opacity: 0.8;
+      transition: 0.1s;
+    }
+    canvas.bars:hover {
+      opacity: 1.0;
+    }
+  </style>
+
+  <script src="waveform.js"></script>
+  <script src="waveformdata.js"></script>
+  <script src="waveformbars.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="//connect.soundcloud.com/sdk.js"></script>
+
+  
+  <script>
+    $(function() {
+      var waveform = window.waveform = new Waveform({
+        container: $('#waveform').get(0),
+        width: 600,
+        height: 400,
+        interpolate: true,
+        innerColor: '#85144b'
+      });
+
+      SC.initialize({
+        client_id: 'b887940f432036b3d2691c428a9863c3'
+      });
+
+
+
+      SC.get('/tracks/293', function(track) {
+        waveform.dataFromSoundCloudTrack(track);
+
+        $('.song .art').attr('src', track.artwork_url);
+        $('.song .title').text(track.title);
+        
+        $('.artist .avatar').attr('src', track.user.avatar_url);
+        $('.artist .name').text(track.user.username);
+      });
+
+      /*SC.stream("/tracks/293", waveform.optionsForSyncedStream({
+        defaultColor: '#85144b',
+        playedColor: '#ffffff',
+        loadedColor: '#2ECC40'
+      }), function(sound) {
+        sound.play();
+      });*/
+
+      var bars = window.bars = new WaveformBars({
+        canvas: $('#canvas').get(0),
+        data: waveformData,
+        barCount: 200
+      });
+
+      bars.draw();
+
+    });
+  </script>
+
+</head>
+<body>
+
+  <div class="artist">
+    <img src="" class="avatar" />
+    <h2 class="name"></h2>
+  </div>
+
+  <div class="song">
+    <img src="" class="art" />
+    <h2 class="title"></h2>
+  </div>
+
+  <div id="waveform"></div>
+
+  <ul id="playlist">
+  </ul>
+
+  <canvas id="canvas" class="bars" width="600" height="200"></canvas>
+  
+</body>
+</html>
