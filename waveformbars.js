@@ -1,4 +1,5 @@
-
+// http://stackoverflow.com/questions/15642968/soundcloud-waveform-json-api
+// http://www.waveformjs.org/w?url=...&callback=...
 
 function WaveformBars(options) {
   this.bars = [];
