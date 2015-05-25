@@ -12,8 +12,9 @@ function WaveformBars(options) {
   this.barMargin = options.barMargin || 1;
 
   this.defaultColor = options.defaultColor || '#FF851B';
-  this.playedColor = options.playedColor || '#FFDC00';
-  this.hoverColor = options.hoverColor || '#FF4136';
+  // this.playedColor = options.playedColor || '#FFDC00';
+  this.playedColor = options.playedColor || '#85144b';
+  this.hoverColor = options.hoverColor || lerpHex(this.defaultColor, this.playedColor, 0.4);
 
   this.apiEndpoint = 'http://www.waveformjs.org/w';
 
@@ -33,12 +34,17 @@ WaveformBars.prototype.bindEvents = function() {
   var mousemove = $.proxy(function(event) {
     if (this.mouseDown === true || this.playing === true) {
       var offset = $canvas.offset();
-      this.hoverProgress = Math.min(event.pageX - offset.left, this.canvas.width) / this.canvas.width;
+      if (!this.mouseDown && (event.pageY - offset.top < 0 || event.pageY - offset.top > this.canvas.height || event.pageX - offset.left < 0 || event.pageX - offset.left > this.canvas.width)) {
+        this.hoverProgress = -1;
+      } else {
+        this.hoverProgress = Math.min(event.pageX - offset.left, this.canvas.width) / this.canvas.width;
+      }
+
       this.draw();
     }
   }, this);
 
-  $canvas.on('mousemove', mousemove);
+  $(window).on('mousemove', mousemove);
 
   $canvas.on('mousedown', $.proxy(function(event) {
     this.mouseDown = true;
@@ -146,6 +152,7 @@ WaveformBars.prototype.draw = function() {
 
   var sweep = 1 / barCount;
   var progress = this.progress;
+  var hoverProgress = this.hoverProgress === -1 ? false : this.hoverProgress;
 
   ctx.clearRect(0, 0, this.canvas.width, height);
   for (var i = 0; i < barCount; i++) {
@@ -154,7 +161,17 @@ WaveformBars.prototype.draw = function() {
     var lerp = (progress - barIndex) / sweep;
     lerp = Math.min(Math.max(lerp, 0), 1);
 
-    var fill = lerpHex(defaultColor, playedColor, lerp);
+    var color = playedColor;
+    if (hoverProgress) {
+      if (hoverProgress < progress && barIndex > hoverProgress && barIndex < progress) {
+        color = hoverColor;
+      }
+      if (hoverProgress > progress && barIndex > progress && barIndex < hoverProgress) {
+        color = hoverColor;
+      }
+    }
+
+    var fill = lerpHex(lerp > 0 && lerp < 1 && hoverProgress !== -1 ? hoverColor : defaultColor, color, color === hoverColor ? 1 : lerp);
 
     var barHeight = barMaxHeight * bars[i];
     var x = i * barWidth +  i * barMargin + barMargin;
@@ -167,7 +184,7 @@ WaveformBars.prototype.draw = function() {
       barHeight
     );
 
-    ctx.fillStyle = lightenHex(fill, 0.7);
+    ctx.fillStyle = lightenHex(lerpHex(defaultColor, playedColor, lerp), 0.7);
     ctx.fillRect(
       x,
       shadowTopY,
