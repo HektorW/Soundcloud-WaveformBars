@@ -17,6 +17,8 @@
     }
 
     canvas.bars {
+      display: block;
+      cursor: pointer;
       opacity: 0.8;
       transition: 0.2s;
     }
@@ -48,6 +50,8 @@
         barCount: 200
       });
 
+      var sound = window.sound = null;
+
       SC.initialize({
         client_id: 'b887940f432036b3d2691c428a9863c3'
       });
@@ -55,7 +59,8 @@
 
       // 188740741
       // 293
-      var trackId = '293';
+      // 141169736
+      var trackId = '141169736';
 
       SC.get('/tracks/' + trackId, function(track) {
         waveform.dataFromSoundCloudTrack(track);
@@ -68,9 +73,14 @@
         $('.artist .name').text(track.user.username);
       });
 
-      SC.stream("/tracks/" + trackId, bars.getStreamOptions(), function(sound) {
-        // debugger
-        // sound.play();
+      SC.stream("/tracks/" + trackId, bars.getStreamOptions(), function(soundArg) {
+        sound = soundArg;
+        $('#play').show();
+      });
+
+      $('#play').click(function() {
+        // sound.pla
+        sound.togglePause();
       });
 
 
@@ -93,8 +103,8 @@
 
   <div id="waveform"></div>
 
-  <ul id="playlist">
-  </ul>
+
+  <button id="play" style="display: none;">toggle</button>
 
   <canvas id="canvas" class="bars" width="600" height="100"></canvas>
   

@@ -1,3 +1,5 @@
+/* globals $ */
+
 // http://stackoverflow.com/questions/15642968/soundcloud-waveform-json-api
 // http://www.waveformjs.org/w?url=...&callback=...
 
@@ -29,7 +31,7 @@ WaveformBars.prototype.bindEvents = function() {
   var $canvas = $(this.canvas);
 
   var mousemove = $.proxy(function(event) {
-    if (this.mouseDown === true) {
+    if (this.mouseDown === true || this.playing === true) {
       var offset = $canvas.offset();
       this.hoverProgress = Math.min(event.pageX - offset.left, this.canvas.width) / this.canvas.width;
       this.draw();
@@ -82,9 +84,10 @@ WaveformBars.prototype.getStreamOptions = function() {
       that.draw();
     },
     whileloading: function() {
+      that.playing = true;
       $(that.canvas).addClass('active');
     }
-  }
+  };
 };
 
 WaveformBars.prototype.calulcateBars = function(data, barCount) {
